@@ -91,6 +91,14 @@ def check_ping6_request(args, packet):
 	if icmp.data != PAYLOAD_MAGIC:
 		return False
 
+	# Wait to check expectations until we've established this is the packet we
+	# sent.
+	if args.expect_tc:
+		if ip.tc != int(args.expect_tc[0]):
+			print("Unexpected traffic class value %d, expected %d" \
+				% (ip.tc, int(args.expect_tc[0])))
+			return False
+
 	return True
 
 def ping(send_if, dst_ip, args):
@@ -130,10 +138,14 @@ def main():
 	# Packet settings
 	parser.add_argument('--send-tos', nargs=1,
 		help='Set the ToS value for the transmitted packet')
+	parser.add_argument('--send-tc', nargs=1,
+		help='Set the traffic class value for the transmitted packet')
 
 	# Expectations
 	parser.add_argument('--expect-tos', nargs=1,
 		help='The expected ToS value in the received packet')
+	parser.add_argument('--expect-tc', nargs=1,
+		help='The expected traffic class value in the received packet')
 
 	args = parser.parse_args()
 
