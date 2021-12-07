@@ -1212,6 +1212,8 @@ pf_normalize_ip6(struct mbuf **m0, int dir, struct pfi_kkif *kif,
 	pf_counter_u64_add_protected(&r->bytes[dir == PF_OUT], pd->tot_len);
 	pf_counter_u64_critical_exit();
 
+	//<! REMOVE
+#if 0
 	/* Check for illegal packets */
 	if (sizeof(struct ip6_hdr) + IPV6_MAXPACKET < m->m_pkthdr.len)
 		goto drop;
@@ -1280,11 +1282,19 @@ pf_normalize_ip6(struct mbuf **m0, int dir, struct pfi_kkif *kif,
 
 	if (sizeof(struct ip6_hdr) + plen > m->m_pkthdr.len)
 		goto shortpkt;
+#endif
+	//<!
+
+	//<! NEW
+	// Possibly call pf_pull_hdr and pf_reassemble6
+	//<!
 
 	pf_scrub_ip6(&m, r->rule_flag, r->min_ttl, r->set_tos);
 
 	return (PF_PASS);
 
+	//<! REMOVE
+#if 0
  fragment:
 	if (sizeof(struct ip6_hdr) + plen > m->m_pkthdr.len)
 		goto shortpkt;
@@ -1318,6 +1328,7 @@ pf_normalize_ip6(struct mbuf **m0, int dir, struct pfi_kkif *kif,
 		PFLOG_PACKET(kif, m, AF_INET6, dir, *reason, r, NULL, NULL, pd,
 		    1);
 	return (PF_DROP);
+#endif
 }
 #endif /* INET6 */
 

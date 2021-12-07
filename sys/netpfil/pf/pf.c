@@ -6991,13 +6991,35 @@ pf_test6(int dir, int pflags, struct ifnet *ifp, struct mbuf **m0, struct inpcb 
 
 	PF_RULES_RLOCK();
 
-	/* We do IP header normalization and packet reassembly here */
-	if (pf_normalize_ip6(m0, dir, kif, &reason, &pd) != PF_PASS) {
-		action = PF_DROP;
-		goto done;
-	}
-	m = *m0;	/* pf_normalize messes with m0 */
+	//<! NEW
+
 	h = mtod(m, struct ip6_hdr *);
+	if (sizeof(struct ip6_hdr) + ntohs(h->ip6_plen) > m->m_pkthdr.len) {
+		// Short packet, goto shortpkt;
+	}
+
+	if (pf_walk_header6(...) != PF_PASS) {
+		// Drop packet
+	}
+
+	// TODO: Handle fragments
+	if (fragment) {
+		/* We do IP header normalization and packet reassembly here */
+		if (pf_normalize_ip6(m0, dir, kif, &reason, &pd) != PF_PASS) {
+			action = PF_DROP;
+			goto done;
+		}
+		m = *m0;
+		if (m == NULL) {
+			// Drop or Pass?
+		}
+
+		if (pf_walk_header6(...) != PF_PASS) {
+			// Drop packet
+		}
+	
+		h = mtod(m, struct ip6_hdr *);
+	}
 
 	/*
 	 * we do not support jumbogram.  if we keep going, zero ip6_plen
@@ -7021,6 +7043,17 @@ pf_test6(int dir, int pflags, struct ifnet *ifp, struct mbuf **m0, struct inpcb 
 	pd.tos = IPV6_DSCP(h);
 	pd.tot_len = ntohs(h->ip6_plen) + sizeof(struct ip6_hdr);
 
+	if (fragment) {
+		/*
+		 * Handle fragments that aren't reassmbled by
+		 * normalization
+		 */
+		 // OpenBSD tests rule here, I suspect we want to call
+		 // pf_test_fragment here instead
+	}
+
+	//<! REMOVE
+#if 0
 	off = ((caddr_t)h - m->m_data) + sizeof(struct ip6_hdr);
 	pd.proto = h->ip6_nxt;
 	do {
@@ -7088,6 +7121,9 @@ pf_test6(int dir, int pflags, struct ifnet *ifp, struct mbuf **m0, struct inpcb 
 			break;
 		}
 	} while (!terminal);
+#endif
+	//<!
+
 
 	/* if there's no routing header, use unmodified mbuf for checksumming */
 	if (!n)
