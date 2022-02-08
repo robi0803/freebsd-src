@@ -1176,7 +1176,7 @@ pf_normalize_ip6(struct mbuf **m0, int dir, struct pfi_kkif *kif,
 	int			 ooff;
 	u_int8_t		 proto;
 	int			 terminal;
-
+#if 0
 	PF_RULES_RASSERT();
 
 	r = TAILQ_FIRST(pf_main_ruleset.rules[PF_RULESET_SCRUB].active.ptr);
@@ -1211,7 +1211,7 @@ pf_normalize_ip6(struct mbuf **m0, int dir, struct pfi_kkif *kif,
 	pf_counter_u64_add_protected(&r->packets[dir == PF_OUT], 1);
 	pf_counter_u64_add_protected(&r->bytes[dir == PF_OUT], pd->tot_len);
 	pf_counter_u64_critical_exit();
-
+#endif
 	//<! REMOVE
 #if 0
 	/* Check for illegal packets */
@@ -1289,7 +1289,7 @@ pf_normalize_ip6(struct mbuf **m0, int dir, struct pfi_kkif *kif,
 	// Possibly call pf_pull_hdr and pf_reassemble6
 	//<!
 
-	pf_scrub_ip6(&m, r->rule_flag, r->min_ttl, r->set_tos);
+	//pf_scrub_ip6(&m, r->rule_flag, r->min_ttl, r->set_tos);
 
 	return (PF_PASS);
 
