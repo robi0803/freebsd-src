@@ -1986,8 +1986,8 @@ int	pf_normalize_ip(struct mbuf **, int, struct pfi_kkif *, u_short *,
 
 #ifdef INET6
 int	pf_test6(int, int, struct ifnet *, struct mbuf **, struct inpcb *);
-int	pf_normalize_ip6(struct mbuf **, int, struct pfi_kkif *, u_short *,
-	    struct pf_pdesc *);
+int	pf_normalize_ip6(struct mbuf **, int, int, int,
+	    u_short *);
 void	pf_poolmask(struct pf_addr *, struct pf_addr*,
 	    struct pf_addr *, struct pf_addr *, u_int8_t);
 void	pf_addr_inc(struct pf_addr *, sa_family_t);
